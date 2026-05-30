@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { healthCheckService } from '../../services';
-import LoadingSpinner from '../common/LoadingSpinner';
-import ErrorAlert from '../common/ErrorAlert';
+import { healthCheckService } from '../services';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import ErrorAlert from '../components/common/ErrorAlert';
 
 function HomePage() {
   const [health, setHealth] = useState(null);
