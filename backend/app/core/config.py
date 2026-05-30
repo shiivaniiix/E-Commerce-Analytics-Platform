@@ -25,10 +25,20 @@ class Settings(BaseSettings):
     CORS_METHODS: list = ["*"]
     CORS_HEADERS: list = ["*"]
     
+    # AWS S3 Export Configuration
+    AWS_ACCESS_KEY_ID: str = ""
+    AWS_SECRET_ACCESS_KEY: str = ""
+    AWS_S3_BUCKET: str = ""
+    AWS_S3_REGION: str = "us-east-1"
+    AWS_S3_PREFIX: str = "ecommerce_exports"
+
+    # Export settings
+    EXPORT_FOLDER: str = "exports"
+
     # Environment
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
-    
+
     class Config:
         env_file = ".env"
         case_sensitive = True
