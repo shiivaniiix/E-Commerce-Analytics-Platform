@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import authService from '../services/authService';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 function LoginForm() {
   const [email, setEmail] = useState('');
@@ -8,6 +8,8 @@ function LoginForm() {
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const auth = useAuth();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -15,8 +17,10 @@ function LoginForm() {
     setIsSubmitting(true);
 
     try {
-      await authService.login(email, password);
-      navigate('/dashboard');
+      await auth.login(email, password);
+      // Redirect to intended page or homepage
+      const dest = location.state?.from || '/';
+      navigate(dest);
     } catch (err) {
       const message = err?.detail || err?.message || 'Login failed';
       setError(message);

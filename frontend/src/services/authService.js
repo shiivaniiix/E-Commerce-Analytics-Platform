@@ -53,11 +53,8 @@ const authService = {
         phone_number: userData.phoneNumber || null
       });
 
-      // Store token and user
-      localStorage.setItem('access_token', response.data.access_token);
-      localStorage.setItem('user', JSON.stringify(response.data.customer));
-      localStorage.setItem('token_expires_in', response.data.expires_in);
-
+      // Do NOT auto-store token or log the user in after signup.
+      // Return the server response so the UI can redirect to /login.
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -77,11 +74,7 @@ const authService = {
         password
       });
 
-      // Store token and user
-      localStorage.setItem('access_token', response.data.access_token);
-      localStorage.setItem('user', JSON.stringify(response.data.customer));
-      localStorage.setItem('token_expires_in', response.data.expires_in);
-
+      // Return the server response. AuthContext will handle storing the token and user.
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -142,12 +135,6 @@ const authService = {
   deactivateAccount: async () => {
     try {
       const response = await apiClient.post('/auth/deactivate');
-      
-      // Clear stored data
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('token_expires_in');
-      
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -171,10 +158,10 @@ const authService = {
    * Logout user
    */
   logout: () => {
+    // Client code should handle clearing storage and redirecting.
     localStorage.removeItem('access_token');
     localStorage.removeItem('user');
-    localStorage.removeItem('token_expires_in');
-    window.location.href = '/login';
+    localStorage.removeItem('token_set_at');
   },
 
   /**

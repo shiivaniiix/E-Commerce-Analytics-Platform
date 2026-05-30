@@ -1,8 +1,24 @@
 import { Link, NavLink } from 'react-router-dom';
 import { useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
 function Navbar() {
   const [open, setOpen] = useState(false);
+
+  const auth = useAuth();
+
+  const handleLogout = () => {
+    auth.logout();
+  };
+
+  const cartCount = (() => {
+    try {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      return Array.isArray(cart) ? cart.length : 0;
+    } catch (e) {
+      return 0;
+    }
+  })();
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md">
@@ -25,19 +41,32 @@ function Navbar() {
             <NavLink to="/products" className={({ isActive }) => `rounded-full px-4 py-2 text-sm font-medium transition ${isActive ? 'bg-primary text-white' : 'text-slate-700 hover:bg-slate-100'}`}>
               Products
             </NavLink>
-            <NavLink to="/cart" className="rounded-full px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
-              Cart
-            </NavLink>
-            <NavLink to="/login" className="rounded-full px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
-              Login
-            </NavLink>
-            <NavLink to="/signup" className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
-              Sign Up
-            </NavLink>
+            {auth.isAuthenticated ? (
+              <>
+                <NavLink to="/profile" className="rounded-full px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                  Profile
+                </NavLink>
+                <NavLink to="/cart" className="rounded-full px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                  Cart
+                </NavLink>
+                <button onClick={handleLogout} className="rounded-full px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink to="/login" className="rounded-full px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                  Login
+                </NavLink>
+                <NavLink to="/signup" className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
+                  Sign Up
+                </NavLink>
+              </>
+            )}
           </div>
         </div>
 
-        <div className="hidden items-center gap-4 md:flex">
+          <div className="hidden items-center gap-4 md:flex">
           <div className="relative hidden md:block">
             <input
               type="search"
@@ -47,7 +76,7 @@ function Navbar() {
           </div>
           <Link to="/cart" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
             <span>Cart</span>
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-sm text-slate-900">3</span>
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-sm text-slate-900">{cartCount}</span>
           </Link>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import authService from '../services/authService';
+import { useAuth } from '../contexts/AuthContext';
 
 function SignupForm() {
   const [firstName, setFirstName] = useState('');
@@ -11,6 +11,7 @@ function SignupForm() {
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const auth = useAuth();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -18,14 +19,15 @@ function SignupForm() {
     setIsSubmitting(true);
 
     try {
-      await authService.signup({
+      await auth.signup({
         email,
         password,
         firstName,
         lastName,
         phoneNumber
       });
-      navigate('/dashboard');
+      // after signup, redirect to login per requirements
+      navigate('/login');
     } catch (err) {
       const message = err?.detail || err?.message || 'Signup failed';
       setError(message);
