@@ -1,103 +1,436 @@
-# E-Commerce Analytics Platform – End-to-End Data Engineering Project
+# E-Commerce Analytics Platform
 
-# 1. Project Overview
+A full-stack e-commerce platform with AI-powered analytics, built with React + Vite (frontend) and FastAPI (backend).
 
-## Introduction
+## 📋 Table of Contents
 
-This project is a complete end-to-end E-Commerce platform integrated with a modern Data Engineering and Analytics pipeline.
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Backend Setup](#backend-setup)
+- [Frontend Setup](#frontend-setup)
+- [Database Setup](#database-setup)
+- [Running the Application](#running-the-application)
+- [API Documentation](#api-documentation)
+- [Features](#features)
+- [Environment Variables](#environment-variables)
+- [Development](#development)
 
-The application allows customers to:
+## 📁 Project Structure
 
-* Sign up / Login
-* Browse products
-* Add items to cart
-* Manage addresses
-* Place orders
-* Select payment methods
-* Track order history
+```
+E-Commerce Analytics Platform/
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── common/          # Reusable UI components
+│   │   │   ├── layout/          # Layout components (Header, Footer)
+│   │   │   ├── products/        # Product-related components
+│   │   │   ├── cart/            # Cart components
+│   │   │   └── auth/            # Authentication components
+│   │   ├── pages/               # Page components
+│   │   ├── services/            # API services
+│   │   ├── hooks/               # Custom React hooks
+│   │   ├── context/             # React Context
+│   │   ├── utils/               # Utility functions
+│   │   ├── assets/              # Images, fonts, etc.
+│   │   ├── App.jsx              # Root component
+│   │   └── main.jsx             # Entry point
+│   ├── public/                  # Static assets
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   ├── postcss.config.js
+│   ├── index.html
+│   └── .env.example
+│
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   │   └── v1/
+│   │   │       ├── endpoints/   # API endpoints
+│   │   │       └── router.py    # API router
+│   │   ├── core/
+│   │   │   ├── config.py        # Configuration management
+│   │   │   └── security.py      # JWT & password hashing
+│   │   ├── db/
+│   │   │   └── base.py          # Database setup & session
+│   │   ├── models/              # SQLAlchemy models
+│   │   ├── schemas/             # Pydantic schemas
+│   │   ├── services/            # Business logic
+│   │   └── main.py              # FastAPI app initialization
+│   ├── tests/                   # Unit tests
+│   ├── main.py                  # Entry point
+│   ├── requirements.txt
+│   └── .env.example
+│
+└── README.md                    # This file
+```
 
-The project also includes a modern cloud-based analytics architecture where operational data is processed into a Data Warehouse for business reporting and analytics.
+## 🔧 Prerequisites
 
-The main objective of this project is to simulate how real-world E-Commerce companies design:
+### System Requirements
+- Python 3.10+
+- Node.js 16+ and npm
+- PostgreSQL 12+
 
-* Transactional systems
-* Data pipelines
-* Cloud storage
-* Data warehousing
-* Analytics dashboards
+### Install PostgreSQL
+
+**On Windows:**
+- Download from [postgresql.org](https://www.postgresql.org/download/windows/)
+- During installation, set a password for the `postgres` user
+- PostgreSQL will run on port 5432 by default
+
+**On macOS:**
+```bash
+brew install postgresql@15
+brew services start postgresql@15
+```
+
+**On Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get update
+sudo apt-get install postgresql postgresql-contrib
+sudo service postgresql start
+```
+
+## 🚀 Backend Setup
+
+### 1. Navigate to Backend Directory
+```bash
+cd backend
+```
+
+### 2. Create Virtual Environment
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure Environment Variables
+```bash
+# Copy example env file
+cp .env.example .env
+
+# Edit .env with your settings
+# Make sure DATABASE_URL is correct for your PostgreSQL setup
+```
+
+### 5. Create Database
+```bash
+# Connect to PostgreSQL
+psql -U postgres
+
+# Run these SQL commands:
+CREATE USER ecommerce_user WITH PASSWORD 'ecommerce_password';
+CREATE DATABASE ecommerce_db OWNER ecommerce_user;
+GRANT ALL PRIVILEGES ON DATABASE ecommerce_db TO ecommerce_user;
+\q
+```
+
+### 6. Initialize Database Tables
+```bash
+# Create tables using SQLAlchemy
+python -c "from app.db.base import engine, Base; from app.models import *; Base.metadata.create_all(bind=engine)"
+```
+
+### 7. Run Backend Server
+```bash
+python main.py
+```
+
+The backend will start at `http://localhost:8000`
+
+**API Documentation:**
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+## 🎨 Frontend Setup
+
+### 1. Navigate to Frontend Directory
+```bash
+cd frontend
+```
+
+### 2. Install Dependencies
+```bash
+npm install
+```
+
+### 3. Configure Environment Variables
+```bash
+# Copy example env file
+cp .env.example .env
+
+# Edit .env if needed (defaults should work for local development)
+```
+
+### 4. Run Development Server
+```bash
+npm run dev
+```
+
+The frontend will start at `http://localhost:3000` or `http://localhost:5173` (Vite's default)
+
+### 5. Build for Production
+```bash
+npm run build
+```
+
+Output will be in the `dist` folder.
+
+## 🗄️ Database Setup
+
+### Models Overview
+
+**User Table**
+- Stores user account information
+- Fields: id, email, first_name, last_name, hashed_password, is_active, timestamps
+
+**Product Table**
+- Stores product information
+- Fields: id, name, description, price, quantity, category, is_active, timestamps
+
+**Order Table**
+- Stores order information
+- Fields: id, user_id, total_amount, status, timestamps
+
+### Connection Details
+
+The project uses SQLAlchemy ORM with PostgreSQL. Connection string format:
+```
+postgresql://username:password@host:port/database
+```
+
+Default example:
+```
+postgresql://ecommerce_user:ecommerce_password@localhost:5432/ecommerce_db
+```
+
+## 🏃 Running the Application
+
+### Development Mode (Both Frontend & Backend)
+
+**Terminal 1 - Backend:**
+```bash
+cd backend
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+python main.py
+```
+
+**Terminal 2 - Frontend:**
+```bash
+cd frontend
+npm run dev
+```
+
+Visit `http://localhost:3000` in your browser.
+
+### Testing API Health
+```bash
+# Should return healthy status
+curl http://localhost:8000/api/health
+```
+
+## 📚 API Documentation
+
+### Base URL
+```
+http://localhost:8000/api
+```
+
+### Available Endpoints
+
+#### Health Check
+```
+GET /health
+```
+
+#### Authentication
+```
+POST /auth/register
+POST /auth/login
+GET /auth/me
+```
+
+### Request/Response Examples
+
+**Register:**
+```bash
+curl -X POST http://localhost:8000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "securepassword",
+    "first_name": "John",
+    "last_name": "Doe"
+  }'
+```
+
+**Login:**
+```bash
+curl -X POST "http://localhost:8000/api/auth/login?email=user@example.com&password=securepassword"
+```
+
+## ✨ Features
+
+### Backend
+- ✅ FastAPI framework with async support
+- ✅ SQLAlchemy ORM for database operations
+- ✅ JWT authentication with bcrypt password hashing
+- ✅ CORS enabled for frontend integration
+- ✅ Pydantic schemas for data validation
+- ✅ Health check endpoint
+- ✅ Production-ready error handling
+- ✅ Environment-based configuration
+
+### Frontend
+- ✅ React 18 with Vite bundler
+- ✅ Tailwind CSS for styling
+- ✅ React Router for navigation
+- ✅ Axios HTTP client with interceptors
+- ✅ Authentication token management
+- ✅ Responsive design
+- ✅ Component-based architecture
+- ✅ Error handling and loading states
+
+## 🔐 Environment Variables
+
+### Backend (.env)
+```
+DATABASE_URL=postgresql://user:password@localhost/dbname
+SECRET_KEY=your-secret-key-here
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+CORS_ORIGINS=["http://localhost:3000"]
+ENVIRONMENT=development
+DEBUG=true
+```
+
+### Frontend (.env)
+```
+VITE_API_BASE_URL=http://localhost:8000/api
+VITE_ENV=development
+```
+
+## 🛠️ Development
+
+### Backend Development
+
+**Code Style:**
+```bash
+# Format code with Black
+black app/
+
+# Lint code
+flake8 app/
+
+# Sort imports
+isort app/
+```
+
+**Testing:**
+```bash
+# Run tests
+pytest
+
+# Run with coverage
+pytest --cov=app
+```
+
+### Frontend Development
+
+**Code Quality:**
+```bash
+# Lint code
+npm run lint
+
+# Fix linting issues
+npm run lint -- --fix
+```
+
+**Development Server Features:**
+- Hot module replacement (HMR)
+- Fast refresh on file changes
+- Proxy to backend API
+
+## 📦 Project Dependencies
+
+### Backend
+- **FastAPI** - Modern web framework
+- **SQLAlchemy** - ORM for database
+- **psycopg2** - PostgreSQL adapter
+- **python-jose** - JWT handling
+- **passlib** - Password hashing
+- **Pydantic** - Data validation
+- **Uvicorn** - ASGI server
+
+### Frontend
+- **React** - UI library
+- **Vite** - Build tool
+- **React Router** - Routing
+- **Axios** - HTTP client
+- **Tailwind CSS** - Styling
+- **Zustand** - State management (optional)
+
+## 🐛 Troubleshooting
+
+### PostgreSQL Connection Error
+- Ensure PostgreSQL is running: `psql -U postgres`
+- Check DATABASE_URL in .env
+- Verify credentials and database name
+
+### Port Already in Use
+- Backend (8000): `lsof -i :8000` or `netstat -ano | findstr :8000`
+- Frontend (3000/5173): `lsof -i :3000` or `netstat -ano | findstr :3000`
+
+### Module Not Found Errors
+- Reinstall dependencies: `pip install -r requirements.txt` or `npm install`
+- Ensure virtual environment is activated
+
+### CORS Issues
+- Check CORS_ORIGINS in backend .env
+- Ensure frontend URL matches allowed origins
+
+## 📝 Next Steps
+
+1. Deploy models and migrations
+2. Implement product endpoints
+3. Add shopping cart functionality
+4. Integrate payment processing
+5. Add order management
+6. Implement user dashboard
+7. Add analytics features
+8. Deploy to production
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 👥 Contributing
+
+Contributions are welcome! Please follow these steps:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📞 Support
+
+For issues and questions, please open an issue in the repository.
 
 ---
 
-# 2. Project Objectives
-
-The goals of this project are:
-
-* Build a scalable E-Commerce application
-* Implement proper relational database design
-* Create cloud-based data pipelines
-* Store and process historical business data
-* Perform analytics using Snowflake + dbt + Power BI
-* Simulate real-world production architecture
-
----
-
-# 3. Tech Stack
-
-## Frontend
-
-* React.js
-* Tailwind CSS
-* Axios
-
-## Backend
-
-* FastAPI / Node.js (Express)
-* REST APIs
-* JWT Authentication
-
-## Operational Database
-
-* PostgreSQL
-
-## Cloud & Storage
-
-* AWS S3
-
-## Data Warehouse
-
-* Snowflake
-
-## Data Transformation
-
-* dbt (Data Build Tool)
-
-## Analytics & Reporting
-
-* Power BI
-
-## CI/CD & Automation
-
-* GitHub Actions
-
----
-
-# 4. High-Level Architecture
-
-```text
-User
-  ↓
-React Frontend
-  ↓
-Backend APIs
-  ↓
-PostgreSQL Database
-  ↓
-Data Export / CDC Pipeline
-  ↓
-AWS S3 Data Lake
-  ↓
-Snowflake Warehouse
-  ↓
+**Happy coding!** 🎉
 dbt Transformations
   ↓
 Power BI Dashboards
