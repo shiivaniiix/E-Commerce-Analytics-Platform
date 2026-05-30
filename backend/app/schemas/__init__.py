@@ -281,6 +281,14 @@ class OrderCreate(BaseModel):
     shipping_fee: float = Field(default=0, ge=0)
 
 
+class OrderFromCartRequest(BaseModel):
+    address_id: int
+    payment_method: str = Field(..., max_length=50)
+    tax_amount: float = Field(default=0, ge=0)
+    discount_amount: float = Field(default=0, ge=0)
+    shipping_fee: float = Field(default=0, ge=0)
+
+
 class OrderUpdate(BaseModel):
     order_status: Optional[OrderStatusSchema] = None
     payment_status: Optional[PaymentStatusSchema] = None
