@@ -3,6 +3,7 @@ Product endpoints
 Handles product creation, retrieval, update, delete, filtering, search and pagination
 """
 
+import logging
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Path
 from sqlalchemy.orm import Session
@@ -16,6 +17,8 @@ from app.schemas import (
 )
 from app.services.product_service import ProductService
 from app.models import Category
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -39,6 +42,7 @@ async def create_product(
     except HTTPException:
         raise
     except Exception:
+        logger.exception("Failed to create product")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while creating the product"
@@ -71,6 +75,13 @@ async def list_products(
             page_size=page_size,
         )
     except Exception:
+        logger.exception(
+            "Failed to list products (page=%s, page_size=%s, category_id=%s, search=%s)",
+            page,
+            page_size,
+            category_id,
+            search,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while fetching products"
@@ -111,6 +122,7 @@ async def update_product(
     except HTTPException:
         raise
     except Exception:
+        logger.exception("Failed to update product %s", product_id)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while updating the product"

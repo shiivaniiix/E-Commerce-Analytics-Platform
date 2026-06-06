@@ -63,6 +63,10 @@ async def startup_event():
     print(f"Environment: {settings.ENVIRONMENT}")
     print(f"Debug mode: {settings.DEBUG}")
 
+    # Ensure legacy databases have schema patches applied before serving traffic.
+    from migrate_add_product_image import run as migrate_product_image
+    migrate_product_image()
+
 
 @app.on_event("shutdown")
 async def shutdown_event():

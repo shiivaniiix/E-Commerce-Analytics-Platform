@@ -23,6 +23,10 @@ def init_db():
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created successfully!")
 
+    # Apply lightweight schema patches for databases created before model updates.
+    from migrate_add_product_image import run as migrate_product_image
+    migrate_product_image()
+
 
 def drop_db():
     """Drop all tables (use with caution!)"""

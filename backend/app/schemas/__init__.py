@@ -60,6 +60,14 @@ class CustomerUpdate(BaseModel):
     account_status: Optional[AccountStatusSchema] = None
 
 
+class ProfileUpdate(BaseModel):
+    """Schema for updating the current user's profile."""
+    first_name: Optional[str] = Field(None, min_length=1, max_length=100)
+    last_name: Optional[str] = Field(None, min_length=1, max_length=100)
+    email: Optional[EmailStr] = None
+    phone_number: Optional[str] = Field(None, max_length=20)
+
+
 class CustomerResponse(CustomerBase):
     customer_id: int
     account_created_at: datetime
@@ -141,6 +149,7 @@ class ProductBase(BaseModel):
     category_id: int
     brand: Optional[str] = Field(None, max_length=100)
     description: Optional[str] = None
+    image_url: Optional[str] = Field(None, max_length=500)
     selling_price: float = Field(..., gt=0)
     cost_price: float = Field(..., ge=0)
     stock_quantity: int = Field(default=0, ge=0)
@@ -168,6 +177,7 @@ class ProductUpdate(BaseModel):
     category_id: Optional[int] = None
     brand: Optional[str] = None
     description: Optional[str] = None
+    image_url: Optional[str] = None
     selling_price: Optional[float] = None
     cost_price: Optional[float] = None
     stock_quantity: Optional[int] = None
