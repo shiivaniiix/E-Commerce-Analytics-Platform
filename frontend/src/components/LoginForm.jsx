@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
+import { getErrorMessage } from '../utils/helpers';
 
 function LoginForm() {
   const [email, setEmail] = useState('');
@@ -10,6 +12,7 @@ function LoginForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const auth = useAuth();
+  const toast = useToast();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -18,12 +21,13 @@ function LoginForm() {
 
     try {
       await auth.login(email, password);
-      // Redirect to intended page or homepage
+      toast.success('Welcome back!');
       const dest = location.state?.from || '/';
       navigate(dest);
     } catch (err) {
-      const message = err?.detail || err?.message || 'Login failed';
+      const message = getErrorMessage(err) || 'Login failed';
       setError(message);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -72,6 +76,12 @@ function LoginForm() {
           {isSubmitting ? 'Logging in...' : 'Login'}
         </button>
       </form>
+      <p className="mt-4 text-center text-sm text-slate-600">
+        Don&apos;t have an account?{' '}
+        <a href="/signup" className="font-semibold text-primary hover:underline">
+          Sign up
+        </a>
+      </p>
     </div>
   );
 }

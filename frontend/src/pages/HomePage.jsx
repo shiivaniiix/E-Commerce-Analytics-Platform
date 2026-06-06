@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { healthCheckService } from '../services';
-import LoadingSpinner from '../components/common/LoadingSpinner';
+import { categoryService, productService } from '../services';
+import { normalizeProduct, getErrorMessage } from '../utils/helpers';
 import ErrorAlert from '../components/common/ErrorAlert';
 import {
   HeroSection,
@@ -11,43 +11,46 @@ import {
 } from '../components/home';
 
 function HomePage() {
-  const [health, setHealth] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const checkHealth = async () => {
+    let active = true;
+
+    const load = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const data = await healthCheckService.check();
-        setHealth(data);
-        setError(null);
+        const [cats, productData] = await Promise.all([
+          categoryService.getAll(),
+          productService.getAll({ pageSize: 8 }),
+        ]);
+        if (!active) return;
+        setCategories(cats || []);
+        setProducts((productData.products || []).map(normalizeProduct));
       } catch (err) {
-        setError('Failed to connect to backend');
+        if (active) setError(getErrorMessage(err));
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
-    checkHealth();
+    load();
+    return () => {
+      active = false;
+    };
   }, []);
 
-  if (loading) return <LoadingSpinner />;
-
   return (
-    <main className="space-y-12">
-      {error && <ErrorAlert message={error} />}
+    <main className="mx-auto max-w-7xl space-y-16 px-4 py-10 sm:px-6 lg:px-8">
+      {error && <ErrorAlert message={`Could not load store data: ${error}`} />}
       <HeroSection />
-      <FeaturedCategories />
-      <FeaturedProducts />
+      <FeaturedCategories categories={categories} loading={loading} />
+      <FeaturedProducts products={products.slice(0, 4)} loading={loading} />
       <PromoBanner />
       <Testimonials />
-
-      {health && (
-        <section className="rounded-[1.75rem] border border-slate-200 bg-white p-8 shadow-lg">
-          <h2 className="text-xl font-semibold text-slate-900">Backend connection verified</h2>
-          <p className="mt-2 text-slate-600">Status: {health.status}</p>
-        </section>
-      )}
     </main>
   );
 }

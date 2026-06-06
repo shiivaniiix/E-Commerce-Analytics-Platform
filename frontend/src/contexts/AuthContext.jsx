@@ -12,30 +12,26 @@ export function AuthProvider({ children }) {
     try {
       const raw = localStorage.getItem('user');
       return raw ? JSON.parse(raw) : null;
-    } catch (e) {
+    } catch {
       return null;
     }
   });
   const [token, setToken] = useState(() => localStorage.getItem('access_token'));
   const [loading, setLoading] = useState(false);
 
-  const clearSession = useCallback((showMessage) => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('token_set_at');
-    if (showMessage) {
-      // simple user-facing message; consumer UI can replace this with toasts
-      try {
-        // eslint-disable-next-line no-alert
-        alert(showMessage);
-      } catch (e) {}
-    }
-    navigate('/login');
-  }, [navigate]);
+  const clearSession = useCallback(
+    (redirect = true) => {
+      setUser(null);
+      setToken(null);
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('token_set_at');
+      if (redirect) navigate('/login');
+    },
+    [navigate],
+  );
 
-  // Auto-check token expiry on mount
+  // Auto-expire the session after 15 days.
   useEffect(() => {
     const tokenSet = localStorage.getItem('token_set_at');
     const access = localStorage.getItem('access_token');
@@ -44,11 +40,9 @@ export function AuthProvider({ children }) {
       if (Number.isFinite(setAt)) {
         const age = Date.now() - setAt;
         if (age >= FIFTEEN_DAYS_MS) {
-          clearSession('Session expired. Please login again.');
+          clearSession();
         } else {
-          // set a timeout to auto-logout when expires
-          const remaining = FIFTEEN_DAYS_MS - age;
-          const t = setTimeout(() => clearSession('Session expired. Please login again.'), remaining);
+          const t = setTimeout(() => clearSession(), FIFTEEN_DAYS_MS - age);
           return () => clearTimeout(t);
         }
       }
@@ -60,7 +54,6 @@ export function AuthProvider({ children }) {
     setLoading(true);
     try {
       const data = await authService.login(email, password);
-      // expect { access_token, customer }
       const accessToken = data.access_token;
       const customer = data.customer || data.user || null;
       setToken(accessToken);
@@ -68,25 +61,17 @@ export function AuthProvider({ children }) {
       localStorage.setItem('access_token', accessToken);
       localStorage.setItem('user', JSON.stringify(customer));
       localStorage.setItem('token_set_at', String(Date.now()));
-
-      // schedule auto logout after 15 days
-      const t = setTimeout(() => {
-        clearSession('Session expired. Please login again.');
-      }, FIFTEEN_DAYS_MS);
-      // we don't keep a ref to timer; on reload mount will set again
-
       return data;
     } finally {
       setLoading(false);
     }
-  }, [clearSession]);
+  }, []);
 
   const signup = useCallback(async (payload) => {
     setLoading(true);
     try {
-      const data = await authService.signup(payload);
-      // do NOT auto-login: caller should redirect to /login
-      return data;
+      // Intentionally does NOT auto-login; caller redirects to /login.
+      return await authService.signup(payload);
     } finally {
       setLoading(false);
     }
@@ -96,6 +81,15 @@ export function AuthProvider({ children }) {
     clearSession();
   }, [clearSession]);
 
+  // Keep the cached user in sync after profile edits.
+  const updateUser = useCallback((updated) => {
+    setUser((prev) => {
+      const next = { ...(prev || {}), ...(updated || {}) };
+      localStorage.setItem('user', JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   const value = {
     user,
     token,
@@ -104,6 +98,7 @@ export function AuthProvider({ children }) {
     login,
     signup,
     logout,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

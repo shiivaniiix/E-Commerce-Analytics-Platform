@@ -1,6 +1,8 @@
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../common';
 
 function HeroSection() {
+  const navigate = useNavigate();
   return (
     <section className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-slate-950 via-slate-900 to-slate-700 px-6 py-16 text-white sm:px-10 lg:px-16">
       <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
@@ -13,8 +15,8 @@ function HeroSection() {
             Shop the latest curated collection with fast checkout, free shipping, and trusted customer care.
           </p>
           <div className="flex flex-wrap gap-4">
-            <Button variant="primary">Shop New Arrivals</Button>
-            <Button variant="ghost" className="border-white/20 text-white hover:bg-white/10">Explore Collections</Button>
+            <Button variant="primary" onClick={() => navigate('/products')}>Shop New Arrivals</Button>
+            <Button variant="ghost" className="border-white/20 text-white hover:bg-white/10" onClick={() => navigate('/products')}>Explore Collections</Button>
           </div>
         </div>
 

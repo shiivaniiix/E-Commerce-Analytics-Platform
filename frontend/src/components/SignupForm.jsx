@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
+import { getErrorMessage } from '../utils/helpers';
 
 function SignupForm() {
   const [firstName, setFirstName] = useState('');
@@ -12,6 +14,7 @@ function SignupForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const auth = useAuth();
+  const toast = useToast();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -24,13 +27,14 @@ function SignupForm() {
         password,
         firstName,
         lastName,
-        phoneNumber
+        phoneNumber,
       });
-      // after signup, redirect to login per requirements
+      toast.success('Account created! Please log in.');
       navigate('/login');
     } catch (err) {
-      const message = err?.detail || err?.message || 'Signup failed';
+      const message = getErrorMessage(err) || 'Signup failed';
       setError(message);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }

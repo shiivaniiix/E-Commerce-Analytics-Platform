@@ -11,52 +11,91 @@ import PurchasePage from './pages/PurchasePage';
 import ProfilePage from './pages/ProfilePage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import { AuthProvider } from './contexts/AuthContext';
+import { ToastProvider } from './contexts/ToastContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import PublicOnlyRoute from './components/PublicOnlyRoute';
 
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/products" element={<ProductsPage />} />
-            <Route path="/product/:id" element={<ProductPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
+      <ToastProvider>
+        <AuthProvider>
+          <Layout>
+            <Routes>
+              {/* Public auth routes (redirect away if already logged in) */}
+              <Route
+                path="/login"
+                element={
+                  <PublicOnlyRoute>
+                    <LoginPage />
+                  </PublicOnlyRoute>
+                }
+              />
+              <Route
+                path="/signup"
+                element={
+                  <PublicOnlyRoute>
+                    <SignupPage />
+                  </PublicOnlyRoute>
+                }
+              />
 
-            <Route
-              path="/cart"
-              element={
-                <ProtectedRoute>
-                  <CartPage />
-                </ProtectedRoute>
-              }
-            />
+              {/* Authenticated app */}
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <HomePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/products"
+                element={
+                  <ProtectedRoute>
+                    <ProductsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/products/:productId"
+                element={
+                  <ProtectedRoute>
+                    <ProductPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/cart"
+                element={
+                  <ProtectedRoute>
+                    <CartPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/purchase"
+                element={
+                  <ProtectedRoute>
+                    <PurchasePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/purchase/success" element={<OrderSuccessPage />} />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/purchase"
-              element={
-                <ProtectedRoute>
-                  <PurchasePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/purchase/success" element={<OrderSuccessPage />} />
-
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Layout>
-      </AuthProvider>
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Layout>
+        </AuthProvider>
+      </ToastProvider>
     </Router>
   );
 }
