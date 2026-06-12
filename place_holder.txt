@@ -1,0 +1,195 @@
+I need you to act as a Senior Software Architect, Product Manager, Backend Engineer, Data Engineer, and QA Engineer.
+
+Analyze my entire GitHub repository and suggest changes required to make it production-ready and resemble a real-world e-commerce platform.
+
+Current situation:
+
+The project currently loads CSV files from S3 into the database. I currently have data for only the following tables:
+
+* customers.csv
+* products.csv
+* orders.csv
+* order_items.csv
+
+Sample records are available, but I believe the dataset and schema are incomplete for a realistic e-commerce application.
+
+The application is expected to support the following database schema:
+
+CUSTOMER
+
+* customer_id
+* first_name
+* last_name
+* email
+* password_hash
+* phone_number
+* account_created_at
+* account_status
+
+ADDRESS
+
+* address_id
+* customer_id
+* address_line1
+* city
+* state
+* country
+* pincode
+* is_default
+
+CATEGORY
+
+* category_id
+* category_name
+
+PRODUCT
+
+* product_id
+* product_name
+* category_id
+* brand
+* selling_price
+* cost_price
+* stock_quantity
+* created_at
+* is_active
+
+CART
+
+* cart_id
+* customer_id
+* created_at
+
+CART_ITEMS
+
+* cart_item_id
+* cart_id
+* product_id
+* quantity
+
+ORDERS
+
+* order_id
+* customer_id
+* address_id
+* payment_method
+* payment_status
+* order_status
+* subtotal
+* tax_amount
+* discount_amount
+* shipping_fee
+* total_amount
+* placed_at
+* shipped_at
+* delivered_at
+* cancelled_at
+
+ORDER_ITEMS
+
+* order_item_id
+* order_id
+* product_id
+* quantity
+* unit_price
+
+PAYMENT
+
+* payment_id
+* order_id
+* payment_method
+* payment_status
+* transaction_reference
+* paid_at
+
+INVENTORY_LOG
+
+* inventory_log_id
+* product_id
+* change_type
+* quantity_changed
+* changed_at
+
+Inventory change types:
+
+* ORDER_PLACED
+* RESTOCK
+* RETURN
+* CANCELLATION
+
+Expected user flow:
+
+1. User opens application.
+2. User sees Login / Sign Up page.
+3. New user:
+
+   * Sign up using email and password.
+   * Verify account if needed.
+   * After first login, collect:
+
+     * phone number
+     * address details
+4. Existing user:
+
+   * Login using email and password.
+   * Forgot password flow.
+   * Change password flow.
+5. Users can maintain multiple addresses.
+6. User can choose a default address during checkout.
+7. User can:
+
+   * Browse products
+   * Search products
+   * Add products to cart
+   * Update cart quantities
+   * Checkout
+   * Make payment
+   * View order history
+   * Track order status
+
+Tasks:
+
+1. Analyze the entire repository structure.
+2. Explain current architecture.
+3. Identify missing features.
+4. Identify missing APIs.
+5. Identify missing database tables.
+6. Identify missing frontend pages.
+7. Identify missing backend services.
+8. Identify missing validations.
+9. Identify security issues.
+10. Identify scalability concerns.
+11. Identify production-readiness gaps.
+12. Suggest improvements following industry best practices.
+
+Additionally:
+
+* Verify whether current CSV generation logic is sufficient.
+* Generate realistic sample data for all missing tables.
+* Suggest foreign key relationships.
+* Verify normalization.
+* Suggest indexes.
+* Suggest audit fields where necessary.
+* Suggest API endpoints for every module.
+* Suggest frontend screens.
+* Suggest folder structure improvements.
+* Suggest test cases.
+* Suggest monitoring/logging requirements.
+
+For every issue found, provide:
+
+* Current implementation
+* Problem
+* Business impact
+* Recommended solution
+* Priority (Critical/High/Medium/Low)
+
+Finally create:
+
+1. Complete system architecture diagram (text format)
+2. Database ER diagram (text format)
+3. End-to-end user journey
+4. Sprint-wise implementation roadmap
+5. Estimated effort for each feature
+
+Do not assume anything. Read the actual codebase and point to specific files and modules while making recommendations.
